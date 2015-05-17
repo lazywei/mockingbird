@@ -1,0 +1,46 @@
+package scanner_test
+
+import (
+	. "github.com/lazywei/mockingbird/scanner"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
+
+var _ = Describe("Scanner", func() {
+	Describe("Scan", func() {
+
+		Context("when there is matched string", func() {
+			It("should return the string, and ok=true", func() {
+				s := NewScanner("This is the new world")
+				rtn, ok := s.Scan(`This`)
+				Expect(rtn).To(Equal("This"))
+				Expect(ok).To(Equal(true))
+			})
+
+			It("should scan forward for next Scan", func() {
+				s := NewScanner("This is the new world")
+				s.Scan(`This`)
+				rtn, ok := s.Scan(`\s`)
+
+				Expect(rtn).To(Equal(" "))
+				Expect(ok).To(Equal(true))
+
+				rtn, ok = s.Scan(`is`)
+
+				Expect(rtn).To(Equal("is"))
+				Expect(ok).To(Equal(true))
+			})
+		})
+
+		Context("when there is no matched string", func() {
+			It("should return empty string, and ok=false", func() {
+				s := NewScanner("This is the new world")
+				rtn, ok := s.Scan(`is`)
+				Expect(rtn).To(Equal(""))
+				Expect(ok).To(Equal(false))
+			})
+		})
+
+	})
+})
