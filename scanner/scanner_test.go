@@ -97,4 +97,41 @@ var _ = Describe("Scanner", func() {
 		})
 
 	})
+
+	Describe("Peek", func() {
+
+		Context("when not yet EOF", func() {
+			It("should return the next n-length string", func() {
+				s := NewScanner("foo")
+				rtn := s.Peek(1)
+				Expect(rtn).To(Equal("f"))
+
+				rtn = s.Peek(2)
+				Expect(rtn).To(Equal("fo"))
+
+				s.Getch()
+				rtn = s.Peek(2)
+				Expect(rtn).To(Equal("oo"))
+			})
+		})
+
+		Context("when length exceeds the limit", func() {
+			It("should return the string until the end", func() {
+				s := NewScanner("foo")
+				rtn := s.Peek(100)
+				Expect(rtn).To(Equal("foo"))
+			})
+		})
+
+		Context("when at EOF", func() {
+			It("should return empty string", func() {
+				s := NewScanner("f")
+				s.Getch()
+
+				rtn := s.Peek(1)
+				Expect(rtn).To(Equal(""))
+			})
+		})
+
+	})
 })

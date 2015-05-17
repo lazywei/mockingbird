@@ -79,3 +79,17 @@ func (scn *Scanner) Getch() (rtn string, ok bool) {
 func (scn *Scanner) IsEof() bool {
 	return scn.pos >= len(scn.input)
 }
+
+func (scn *Scanner) Peek(length int) string {
+	if scn.IsEof() {
+		return ""
+	} else {
+		end := scn.pos + length
+
+		if end >= len(scn.input) {
+			end = len(scn.input)
+		}
+
+		return scn.input[scn.pos:end]
+	}
+}
