@@ -55,9 +55,12 @@ func (scn *Scanner) ScanUntil(regExpStr string) (rtn string, ok bool) {
 		ok = false
 		return
 	} else {
-		rtn = scn.input[scn.pos:loc[1]]
+
+		rtn = scn.input[scn.pos : scn.pos+loc[1]]
 		ok = true
-		scn.pos = loc[1]
+
+		scn.pos = loc[1] + scn.pos
+
 		return
 	}
 }
