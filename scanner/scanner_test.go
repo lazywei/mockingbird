@@ -65,4 +65,36 @@ var _ = Describe("Scanner", func() {
 		})
 
 	})
+
+	Describe("Getch", func() {
+
+		Context("when not yet EOF", func() {
+			It("should return the current char, ok=true, and move forward", func() {
+				s := NewScanner("foo")
+				rtn, ok := s.Getch()
+				Expect(rtn).To(Equal("f"))
+				Expect(ok).To(Equal(true))
+
+				rtn, ok = s.Getch()
+				Expect(rtn).To(Equal("o"))
+				Expect(ok).To(Equal(true))
+
+				rtn, ok = s.Getch()
+				Expect(rtn).To(Equal("o"))
+				Expect(ok).To(Equal(true))
+			})
+		})
+
+		Context("when at EOF", func() {
+			It("should return empty string, ok=false", func() {
+				s := NewScanner("f")
+				s.Getch()
+
+				rtn, ok := s.Getch()
+				Expect(rtn).To(Equal(""))
+				Expect(ok).To(Equal(false))
+			})
+		})
+
+	})
 })
