@@ -24,5 +24,25 @@ var _ = Describe("Tokenzier", func() {
 			Expect(ExtractTokens(`print 'Hello', '', 'Josh'`)).To(Equal(expectedResult))
 		})
 
+		It("should skip number literals", func() {
+			Expect(ExtractTokens(`1 + 1`)).To(Equal([]string{`+`}))
+			Expect(ExtractTokens(`add(123, 45)`)).To(Equal([]string{`add`, `(`, `)`}))
+			Expect(ExtractTokens(`0x01 | 0x10`)).To(Equal([]string{`|`}))
+			Expect(ExtractTokens(`500.42 * 1.0`)).To(Equal([]string{`*`}))
+		})
+
+		It("should extract common operators", func() {
+			Expect(ExtractTokens("1 + 1")).To(Equal([]string{`+`}))
+			Expect(ExtractTokens("1 - 1")).To(Equal([]string{`-`}))
+			Expect(ExtractTokens("1 * 1")).To(Equal([]string{`*`}))
+			Expect(ExtractTokens("1 / 1")).To(Equal([]string{`/`}))
+			Expect(ExtractTokens("2 % 5")).To(Equal([]string{`%`}))
+			Expect(ExtractTokens("1 & 1")).To(Equal([]string{`&`}))
+			Expect(ExtractTokens("1 && 1")).To(Equal([]string{`&&`}))
+			Expect(ExtractTokens("1 | 1")).To(Equal([]string{`|`}))
+			Expect(ExtractTokens("1 || 1")).To(Equal([]string{`||`}))
+			Expect(ExtractTokens("1 < 0x01")).To(Equal([]string{`<`}))
+			Expect(ExtractTokens("1 << 0x01")).To(Equal([]string{`<<`}))
+		})
 	})
 })

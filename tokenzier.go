@@ -66,8 +66,21 @@ func ExtractTokens(data string) []string {
 				s.ScanUntil(`[^\\]'`)
 			}
 
-		} else if rtn, ok := s.Scan(`[\w\.@#\/\*]+`); ok {
+		} else if _, ok := s.Scan(`(0x)?\d(\d|\.)*`); ok {
+			// Skip number literals
+
+		} else if rtn, ok := s.Scan(`;|\{|\}|\(|\)|\[|\]`); ok {
+			// Common programming punctuation
 			tokens = append(tokens, rtn)
+
+		} else if rtn, ok := s.Scan(`[\w\.@#\/\*]+`); ok {
+			// Regular token
+			tokens = append(tokens, rtn)
+
+		} else if rtn, ok := s.Scan(`<<?|\+|\-|\*|\/|%|&&?|\|\|?`); ok {
+			// Common operators
+			tokens = append(tokens, rtn)
+
 		} else {
 			s.Getch()
 		}
