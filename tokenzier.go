@@ -46,7 +46,7 @@ func ExtractTokens(data string) []string {
 	s := scanner.NewScanner(data)
 	tokens := []string{}
 
-	for s.IsEof() != true {
+	for s.IsEos() != true {
 
 		if false /* SHEBANG, COMMENTS */ {
 

@@ -16,7 +16,7 @@ func NewScanner(input string) *Scanner {
 }
 
 func (scn *Scanner) Scan(regExpStr string) (rtn string, ok bool) {
-	if scn.IsEof() {
+	if scn.IsEos() {
 		return "", false
 	}
 
@@ -43,7 +43,7 @@ func (scn *Scanner) Scan(regExpStr string) (rtn string, ok bool) {
 }
 
 func (scn *Scanner) ScanUntil(regExpStr string) (rtn string, ok bool) {
-	if scn.IsEof() {
+	if scn.IsEos() {
 		return "", false
 	}
 
@@ -77,7 +77,7 @@ func (scn *Scanner) SkipUntil(regExpStr string) (rtn int, ok bool) {
 }
 
 func (scn *Scanner) Getch() (rtn string, ok bool) {
-	if scn.IsEof() {
+	if scn.IsEos() {
 		return "", false
 	}
 
@@ -87,12 +87,22 @@ func (scn *Scanner) Getch() (rtn string, ok bool) {
 	return
 }
 
-func (scn *Scanner) IsEof() bool {
+func (scn *Scanner) IsEos() bool {
 	return scn.pos >= len(scn.input)
+}
+func (scn *Scanner) IsBol() bool {
+
+	if scn.pos == 0 {
+		return true
+	} else if scn.pos >= 2 && scn.input[scn.pos-1:scn.pos] == "\n" {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (scn *Scanner) Peek(length int) string {
-	if scn.IsEof() {
+	if scn.IsEos() {
 		return ""
 	} else {
 		end := scn.pos + length

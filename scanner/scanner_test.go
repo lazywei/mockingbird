@@ -68,7 +68,7 @@ var _ = Describe("Scanner", func() {
 
 	Describe("Getch", func() {
 
-		Context("when not yet EOF", func() {
+		Context("when not yet EOS", func() {
 			It("should return the current char, ok=true, and move forward", func() {
 				s := NewScanner("foo")
 				rtn, ok := s.Getch()
@@ -85,7 +85,7 @@ var _ = Describe("Scanner", func() {
 			})
 		})
 
-		Context("when at EOF", func() {
+		Context("when at EOS", func() {
 			It("should return empty string, ok=false", func() {
 				s := NewScanner("f")
 				s.Getch()
@@ -100,7 +100,7 @@ var _ = Describe("Scanner", func() {
 
 	Describe("Peek", func() {
 
-		Context("when not yet EOF", func() {
+		Context("when not yet EOS", func() {
 			It("should return the next n-length string", func() {
 				s := NewScanner("foo")
 				rtn := s.Peek(1)
@@ -123,7 +123,7 @@ var _ = Describe("Scanner", func() {
 			})
 		})
 
-		Context("when at EOF", func() {
+		Context("when at EOS", func() {
 			It("should return empty string", func() {
 				s := NewScanner("f")
 				s.Getch()
@@ -153,6 +153,24 @@ var _ = Describe("Scanner", func() {
 				Expect(rtn).To(Equal(6))
 				Expect(ok).To(Equal(true))
 			})
+		})
+
+	})
+
+	Describe("Bol", func() {
+
+		It("should return true if it is at beginning of line", func() {
+			s := NewScanner("This\n is an example")
+
+			Expect(s.IsBol()).To(Equal(true))
+
+			s.ScanUntil(`is\n`)
+
+			Expect(s.IsBol()).To(Equal(true))
+
+			s.Getch()
+
+			Expect(s.IsBol()).To(Equal(false))
 		})
 
 	})
