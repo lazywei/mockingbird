@@ -65,6 +65,17 @@ func (scn *Scanner) ScanUntil(regExpStr string) (rtn string, ok bool) {
 	}
 }
 
+func (scn *Scanner) SkipUntil(regExpStr string) (rtn int, ok bool) {
+	rtnStr, ok := scn.ScanUntil(regExpStr)
+	if ok {
+		rtn = len(rtnStr)
+	} else {
+		rtn = 0
+	}
+
+	return
+}
+
 func (scn *Scanner) Getch() (rtn string, ok bool) {
 	if scn.IsEof() {
 		return "", false

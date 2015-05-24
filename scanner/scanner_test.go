@@ -134,4 +134,26 @@ var _ = Describe("Scanner", func() {
 		})
 
 	})
+
+	Describe("SkipUntil", func() {
+
+		Context("when there is matched string", func() {
+			It("should return number of bytes and move to the match, and ok=true", func() {
+				s := NewScanner("This is an example.")
+				rtn, ok := s.SkipUntil(`an`)
+				Expect(rtn).To(Equal(10))
+				Expect(ok).To(Equal(true))
+			})
+
+			It("should scan forward for next SkipUntil", func() {
+				s := NewScanner("This is an example.")
+				s.SkipUntil(`an`)
+				rtn, ok := s.SkipUntil(`amp`)
+
+				Expect(rtn).To(Equal(6))
+				Expect(ok).To(Equal(true))
+			})
+		})
+
+	})
 })
