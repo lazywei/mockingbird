@@ -1,6 +1,8 @@
 package mockingbird_test
 
 import (
+	"io/ioutil"
+
 	. "github.com/lazywei/mockingbird"
 
 	. "github.com/onsi/ginkgo"
@@ -89,6 +91,37 @@ var _ = Describe("Tokenzier", func() {
 
 			for _, sgmlTest := range sgmlTests {
 				Expect(ExtractTokens(sgmlTest.str)).To(Equal(sgmlTest.tokens))
+			}
+		})
+
+	})
+
+	Describe("respect language tokens", func() {
+
+		It("should extract C tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/C/hello.h", []string{
+					`#ifndef`, `HELLO_H`, `#define`,
+					`HELLO_H`, `void`, `hello`,
+					`(`, `)`, `;`, `#endif`}},
+
+				{"test_samples/C/hello.c", []string{
+					`#include`, `<stdio.h>`, `int`,
+					`main`, `(`, `)`,
+					`{`, `printf`, `(`,
+					`)`, `;`, `return`, `;`, `}`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
 			}
 		})
 
