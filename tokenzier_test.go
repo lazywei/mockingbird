@@ -153,5 +153,101 @@ var _ = Describe("Tokenzier", func() {
 			}
 		})
 
+		It("should extract Objective-C tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/Objective-C/Foo.h", []string{
+					`#import`, `<Foundation/Foundation.h>`, `@interface`, `Foo`,
+					`NSObject`, `{`, `}`, `@end`}},
+
+				{"test_samples/Objective-C/Foo.m", []string{
+					`#import`, `@implementation`, `Foo`, `@end`}},
+
+				{"test_samples/Objective-C/hello.m", []string{
+					`#import`, `<Cocoa/Cocoa.h>`, `int`, `main`, `(`, `int`, `argc`,
+					`char`, `*argv`, `[`, `]`, `)`, `{`, `NSLog`, `(`, `@`, `)`, `;`,
+					`return`, `;`, `}`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
+			}
+		})
+
+		It("should extract Objective-C tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/Objective-C/Foo.h", []string{
+					`#import`, `<Foundation/Foundation.h>`, `@interface`, `Foo`,
+					`NSObject`, `{`, `}`, `@end`}},
+
+				{"test_samples/Objective-C/Foo.m", []string{
+					`#import`, `@implementation`, `Foo`, `@end`}},
+
+				{"test_samples/Objective-C/hello.m", []string{
+					`#import`, `<Cocoa/Cocoa.h>`, `int`, `main`, `(`, `int`, `argc`,
+					`char`, `*argv`, `[`, `]`, `)`, `{`, `NSLog`, `(`, `@`, `)`, `;`,
+					`return`, `;`, `}`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
+			}
+		})
+
+	})
+
+	Describe("extract shebang", func() {
+		It("shoould extract shebang string", func() {
+
+			tokenTests := []struct {
+				file    string
+				shebang string
+			}{
+				{"test_samples/Shell/sh", "SHEBANG#!sh"},
+
+				{"test_samples/Shell/bash", "SHEBANG#!bash"},
+
+				{"test_samples/Shell/zsh", "SHEBANG#!zsh"},
+
+				{"test_samples/Shell/invalid-shebang.sh", "echo"},
+
+				{"test_samples/Perl/perl", "SHEBANG#!perl"},
+
+				{"test_samples/Python/python", "SHEBANG#!python"},
+
+				{"test_samples/Ruby/ruby", "SHEBANG#!ruby"},
+
+				{"test_samples/Ruby/ruby2", "SHEBANG#!ruby"},
+
+				{"test_samples/JavaScript/js", "SHEBANG#!node"},
+
+				{"test_samples/PHP/php", "SHEBANG#!php"},
+
+				{"test_samples/Erlang/factorial", "SHEBANG#!escript"},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))[0]).To(Equal(tokenTest.shebang))
+			}
+		})
 	})
 })

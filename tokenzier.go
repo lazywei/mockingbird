@@ -1,6 +1,11 @@
 package mockingbird
 
-import "github.com/lazywei/mockingbird/scanner"
+import (
+	"regexp"
+	"strings"
+
+	"github.com/lazywei/mockingbird/scanner"
+)
 
 var (
 	// Start state on token, ignore anything till the next newline
@@ -29,7 +34,11 @@ func ExtractTokens(data string) []string {
 
 	for s.IsEos() != true {
 
-		if false /* SHEBANG, COMMENTS */ {
+		if token, ok := s.Scan(`^#!.+`); ok {
+			name, ok := extractShebang(token)
+			if ok {
+				tokens = append(tokens, "SHEBANG#!"+name)
+			}
 		} else if s.IsBol() && scanOrNot(s, singleLineCmtPtrn) {
 
 			s.SkipUntil(`\n|\z`)
@@ -120,4 +129,35 @@ func extractSgmlTokens(token string) []string {
 	}
 
 	return tokens
+}
+
+func extractShebang(token string) (string, bool) {
+	s := scanner.NewScanner(token)
+
+	path, ok := s.Scan(`^#!\s*\S+`)
+
+	if !ok {
+		return "", false
+	}
+
+	paths := strings.Split(path, `/`)
+
+	if len(paths) == 0 {
+		return "", false
+	}
+
+	name := paths[len(paths)-1]
+
+	if name == `env` {
+		s.Scan(`\s+`)
+		s.Scan(`.*=[^\s]+\s+`)
+		name, ok = s.Scan(`\S+`)
+	}
+
+	if ok {
+		name = regexp.MustCompile(`[^\d]+`).FindString(name)
+		return name, true
+	} else {
+		return "", false
+	}
 }
