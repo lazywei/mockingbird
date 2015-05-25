@@ -1,45 +1,32 @@
 package mockingbird
 
-import (
-	"github.com/lazywei/mockingbird/scanner"
-	"github.com/taylorchu/toki"
-)
-
-const (
-	NUMBER toki.Token = iota + 1
-	PLUS
-	STRING
-	LS
-)
-
-const (
-	NUMBER_PTRN = `(0x)?\d(\d|\.)*`
-	PLUS_PTRN   = `\+`
-	STRING_PTRN = "[a-z]+"
-	LS_PTRN     = `\"(\\.|[^"])*\"`
-)
+import "github.com/lazywei/mockingbird/scanner"
 
 var (
 	// Start state on token, ignore anything till the next newline
-	singleLineComments = []string{
-		`//`, // C
-		`--`, // Ada, Haskell, AppleScript
-		`#`,  // Ruby
-		`%`,  // Tex
-		`"`,  // Vim
-	}
+
+	// Why would we need the trailing space here?
+	singleLineCmtPtrn = `\s*\/\/ |\s*\-\- |\s*# |\s*% |\s*" `
 
 	// Start state on opening token, ignore anything until the closing
 	// token is reached.
-	multiLineComments = [][]string{
-		[]string{`/*`, `*/`},    // C
-		[]string{`<!--`, `-->`}, // XML
-		[]string{`{-`, `-}`},    // Haskell
-		[]string{`(*`, `*)`},    // Coq
-		[]string{`"""`, `"""`},  // Python
-		[]string{`'''`, `'''`},  // Python
+	multiLineCmtPtrn = `\/\*|<!--|{-|\(\*|"""|'''`
+
+	multiLineCmtPairs = map[string]string{
+		`/*`:   `\*\/`, // C
+		`<!--`: `-->`,  // XML
+		`{-`:   `-}`,   // Haskell
+		`(*`:   `\*\)`, // Coq
+		`"""`:  `"""`,  // Python
+		`'''`:  `'''`,  // Python
 	}
 )
+
+// This function is silly ... silly Go ...
+func scanOrNot(s *scanner.Scanner, ptrn string) bool {
+	_, ok := s.Scan(ptrn)
+	return ok
+}
 
 func ExtractTokens(data string) []string {
 
@@ -49,8 +36,16 @@ func ExtractTokens(data string) []string {
 	for s.IsEos() != true {
 
 		if false /* SHEBANG, COMMENTS */ {
+		} else if s.IsBol() && scanOrNot(s, singleLineCmtPtrn) {
 
-		} else if _, ok := s.Scan(`"`); ok {
+			s.SkipUntil(`\n|\z`)
+
+		} else if startToken, ok := s.Scan(multiLineCmtPtrn); ok {
+
+			closeToken := multiLineCmtPairs[startToken]
+			s.SkipUntil(closeToken)
+
+		} else if scanOrNot(s, `"`) {
 
 			if s.Peek(1) == `"` {
 				s.Getch()
@@ -58,7 +53,7 @@ func ExtractTokens(data string) []string {
 				s.ScanUntil(`[^\\]"`)
 			}
 
-		} else if _, ok := s.Scan(`'`); ok {
+		} else if scanOrNot(s, `'`) {
 
 			if s.Peek(1) == `'` {
 				s.Getch()
@@ -66,7 +61,7 @@ func ExtractTokens(data string) []string {
 				s.ScanUntil(`[^\\]'`)
 			}
 
-		} else if _, ok := s.Scan(`(0x)?\d(\d|\.)*`); ok {
+		} else if scanOrNot(s, `(0x)?\d(\d|\.)*`) {
 			// Skip number literals
 
 		} else if rtn, ok := s.Scan(`;|\{|\}|\(|\)|\[|\]`); ok {
