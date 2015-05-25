@@ -209,6 +209,66 @@ var _ = Describe("Tokenzier", func() {
 			}
 		})
 
+		It("should extract JavaScript tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/JavaScript/hello.js", []string{
+					`(`, `function`, `(`, `)`, `{`, `console.log`, `(`, `)`, `;`, `}`,
+					`)`, `.call`, `(`, `this`, `)`, `;`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
+			}
+		})
+
+		It("should extract JSON tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/JSON/product.json", []string{
+					`{`, `[`, `]`, `{`, `}`, `}`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
+			}
+		})
+		It("should extract Ruby tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/Ruby/foo.rb", []string{
+					`module`, `Foo`, `end`}},
+
+				{"test_samples/Ruby/Rakefile", []string{
+					`task`, `default`, `do`, `puts`, `end`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
+			}
+		})
+
 	})
 
 	Describe("extract shebang", func() {
