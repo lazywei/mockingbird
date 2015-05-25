@@ -114,3 +114,7 @@ func (scn *Scanner) Peek(length int) string {
 		return scn.input[scn.pos:end]
 	}
 }
+
+func (scn *Scanner) Terminate() {
+	scn.pos = len(scn.input)
+}

@@ -22,12 +22,6 @@ var (
 	}
 )
 
-// This function is silly ... silly Go ...
-func scanOrNot(s *scanner.Scanner, ptrn string) bool {
-	_, ok := s.Scan(ptrn)
-	return ok
-}
-
 func ExtractTokens(data string) []string {
 
 	s := scanner.NewScanner(data)
@@ -64,6 +58,12 @@ func ExtractTokens(data string) []string {
 		} else if scanOrNot(s, `(0x)?\d(\d|\.)*`) {
 			// Skip number literals
 
+		} else if rtn, ok := s.Scan(`<[^\s<>][^<>]*>`); ok {
+
+			for _, tkn := range extractSgmlTokens(rtn) {
+				tokens = append(tokens, tkn)
+			}
+
 		} else if rtn, ok := s.Scan(`;|\{|\}|\(|\)|\[|\]`); ok {
 			// Common programming punctuation
 			tokens = append(tokens, rtn)
@@ -80,6 +80,43 @@ func ExtractTokens(data string) []string {
 			s.Getch()
 		}
 
+	}
+
+	return tokens
+}
+
+// This function is silly ... silly Go ...
+func scanOrNot(s *scanner.Scanner, ptrn string) bool {
+	_, ok := s.Scan(ptrn)
+	return ok
+}
+
+func extractSgmlTokens(token string) []string {
+	s := scanner.NewScanner(token)
+	tokens := []string{}
+
+	for s.IsEos() != true {
+		if token, ok := s.Scan(`<\/?[^\s>]+`); ok {
+			tokens = append(tokens, token+">")
+		} else if token, ok := s.Scan(`\w+=`); ok {
+			tokens = append(tokens, token)
+
+			// Then skip over attribute value
+
+			if scanOrNot(s, `"`) {
+				s.SkipUntil(`[^\\]"`)
+			} else if scanOrNot(s, `'`) {
+				s.SkipUntil(`[^\\]'`)
+			} else {
+				s.SkipUntil(`\w+`)
+			}
+		} else if token, ok := s.Scan(`\w+`); ok {
+			tokens = append(tokens, token)
+		} else if scanOrNot(s, `\w+`) {
+			s.Terminate()
+		} else {
+			s.Getch()
+		}
 	}
 
 	return tokens

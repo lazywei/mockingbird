@@ -47,42 +47,49 @@ var _ = Describe("Tokenzier", func() {
 
 		It("should skip comments", func() {
 
-			tokens := [][]string{
-				[]string{`foo`},
-				[]string{`foo`, `bar`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`foo`},
-				[]string{`%`},
-				[]string{`foo`, `bar`},
-				[]string{`foo`, `bar`},
+			cmtTests := []struct {
+				str    string
+				tokens []string
+			}{
+				{"foo\n# Comment", []string{`foo`}},
+				{"foo\n# Comment\nbar", []string{`foo`, `bar`}},
+				{"foo\n// Comment", []string{`foo`}},
+				{"foo\n-- Comment", []string{`foo`}},
+				{"foo\n\" Comment", []string{`foo`}},
+				{"foo /* Comment */", []string{`foo`}},
+				{"foo /* \nComment\n */", []string{`foo`}},
+				{"foo <!-- Comment -->", []string{`foo`}},
+				{"foo {- Comment -}", []string{`foo`}},
+				{"foo (* Comment *)", []string{`foo`}},
+				{"2 % 10\n% Comment", []string{`%`}},
+				{"foo\n\"\"\"\nComment\n\"\"\"\nbar", []string{`foo`, `bar`}},
+				{"foo\n'''\nComment\n'''\nbar", []string{`foo`, `bar`}},
 			}
 
-			strs := []string{
-				"foo\n# Comment",
-				"foo\n# Comment\nbar",
-				"foo\n// Comment",
-				"foo\n-- Comment",
-				"foo\n\" Comment",
-				"foo /* Comment */",
-				"foo /* \nComment\n */",
-				"foo <!-- Comment -->",
-				"foo {- Comment -}",
-				"foo (* Comment *)",
-				"2 % 10\n% Comment",
-				"foo\n\"\"\"\nComment\n\"\"\"\nbar",
-				"foo\n'''\nComment\n'''\nbar",
+			for _, cmtTest := range cmtTests {
+				Expect(ExtractTokens(cmtTest.str)).To(Equal(cmtTest.tokens))
 			}
 
-			for i, str := range strs {
-				Expect(ExtractTokens(str)).To(Equal(tokens[i]))
+		})
+
+		It("should extract SGML tokens", func() {
+
+			sgmlTests := []struct {
+				str    string
+				tokens []string
+			}{
+				{"<html></html>", []string{"<html>", "</html>"}},
+				{"<div id></div>", []string{"<div>", "id", "</div>"}},
+				{"<div id=foo></div>", []string{"<div>", "id=", "</div>"}},
+				{"<div id class></div>", []string{"<div>", "id", "class", "</div>"}},
+				{"<div id=\"foo bar\"></div>", []string{"<div>", "id=", "</div>"}},
+				{"<div id='foo bar'></div>", []string{"<div>", "id=", "</div>"}},
+				{"<?xml version=\"1.0\"?>", []string{"<?xml>", "version="}},
 			}
 
+			for _, sgmlTest := range sgmlTests {
+				Expect(ExtractTokens(sgmlTest.str)).To(Equal(sgmlTest.tokens))
+			}
 		})
 
 	})
