@@ -125,5 +125,33 @@ var _ = Describe("Tokenzier", func() {
 			}
 		})
 
+		It("should extract C++ tokens", func() {
+
+			tokenTests := []struct {
+				file   string
+				tokens []string
+			}{
+				{"test_samples/C++/bar.h", []string{
+					`class`, `Bar`, `{`,
+					`protected`, `char`,
+					`*name`, `;`, `public`,
+					`void`, `hello`, `(`, `)`, `;`, `}`}},
+
+				{"test_samples/C++/hello.cpp", []string{
+					`#include`, `<iostream>`, `using`,
+					`namespace`, `std`, `;`,
+					`int`, `main`, `(`, `)`, `{`,
+					`cout`, `<<`, `<<`, `endl`, `;`, `}`}},
+			}
+
+			for _, tokenTest := range tokenTests {
+				fileContent, err := ioutil.ReadFile(tokenTest.file)
+				if err != nil {
+					panic(err)
+				}
+				Expect(ExtractTokens(string(fileContent))).To(Equal(tokenTest.tokens))
+			}
+		})
+
 	})
 })
