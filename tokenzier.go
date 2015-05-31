@@ -7,17 +7,20 @@ import (
 	"github.com/lazywei/mockingbird/scanner"
 )
 
-var (
-	// Start state on token, ignore anything till the next newline
-
+// Start state on token, ignore anything till the next newline
+func singleLineCmtPtrn() string {
 	// Why would we need the trailing space here?
-	singleLineCmtPtrn = `\s*\/\/ |\s*\-\- |\s*# |\s*% |\s*" `
+	return `\s*\/\/ |\s*\-\- |\s*# |\s*% |\s*" `
+}
 
+func multiLineCmtPtrn() string {
 	// Start state on opening token, ignore anything until the closing
 	// token is reached.
-	multiLineCmtPtrn = `\/\*|<!--|{-|\(\*|"""|'''`
+	return `\/\*|<!--|{-|\(\*|"""|'''`
+}
 
-	multiLineCmtPairs = map[string]string{
+func multiLineCmtPairs() map[string]string {
+	return map[string]string{
 		`/*`:   `\*\/`, // C
 		`<!--`: `-->`,  // XML
 		`{-`:   `-}`,   // Haskell
@@ -25,7 +28,7 @@ var (
 		`"""`:  `"""`,  // Python
 		`'''`:  `'''`,  // Python
 	}
-)
+}
 
 func ExtractTokens(data string) []string {
 
@@ -39,13 +42,13 @@ func ExtractTokens(data string) []string {
 			if ok {
 				tokens = append(tokens, "SHEBANG#!"+name)
 			}
-		} else if s.IsBol() && scanOrNot(s, singleLineCmtPtrn) {
+		} else if s.IsBol() && scanOrNot(s, singleLineCmtPtrn()) {
 
 			s.SkipUntil(`\n|\z`)
 
-		} else if startToken, ok := s.Scan(multiLineCmtPtrn); ok {
+		} else if startToken, ok := s.Scan(multiLineCmtPtrn()); ok {
 
-			closeToken := multiLineCmtPairs[startToken]
+			closeToken := multiLineCmtPairs()[startToken]
 			s.SkipUntil(closeToken)
 
 		} else if scanOrNot(s, `"`) {
