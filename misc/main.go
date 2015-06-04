@@ -14,7 +14,10 @@ var (
 			Arg("destPath", "Path for storing converted RosettaCodeData").
 			Required().String()
 
-	convertLibsvm = kingpin.Command("convertLibsvm", "Convert collected Rosetta data to BoW in libsvm format")
+	convertLibsvm    = kingpin.Command("convertLibsvm", "Convert collected Rosetta data to BoW in libsvm format")
+	libsvmSamplePath = convertLibsvm.
+				Arg("samplePath", "Path to collected samples").
+				Required().String()
 )
 
 func main() {
@@ -25,6 +28,6 @@ func main() {
 
 	// Post message
 	case "convertLibsvm":
-		ConvertLibsvm()
+		ConvertLibsvm(*libsvmSamplePath)
 	}
 }
