@@ -43,6 +43,11 @@ func CollectRosetta(rootPath, destPath string) {
 			for _, codeFile := range codeFiles {
 				codeFileName := getLastSegInPath(codeFile)
 
+				if len(getSubEntries(langDestPath, false, nil)) > 100 {
+					// We don't want too many files in one lang.
+					break
+				}
+
 				cp(filepath.Join(langDestPath, codeFileName), codeFile)
 			}
 		}

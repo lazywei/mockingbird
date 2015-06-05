@@ -1,18 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/lazywei/mockingbird"
 )
 
 func ConvertLibsvm(samplePath string) {
+	// var start time.Time
+	// var elapsed time.Duration
 	langsIdx := map[string]int{}
 	tokensIdx := map[string]int{}
 
 	langDirs := getSubEntries(samplePath, true, nil)
 
 	for _, langDir := range langDirs {
+		fmt.Println(langDir)
 
 		codeFiles := getSubEntries(langDir, false, nil)
 		langName := getLastSegInPath(langDir)
@@ -23,10 +27,13 @@ func ConvertLibsvm(samplePath string) {
 
 		for _, codeFile := range codeFiles {
 
+			// start = time.Now()
 			fileContent, err := ioutil.ReadFile(codeFile)
 			if err != nil {
 				panic(err)
 			}
+			// elapsed = time.Since(start)
+			// fmt.Println("Reading took %s", elapsed)
 
 			tokens := mockingbird.ExtractTokens(string(fileContent))
 
@@ -36,6 +43,7 @@ func ConvertLibsvm(samplePath string) {
 					tokensIdx[token] = len(tokensIdx)
 				}
 			}
+
 		}
 	}
 
