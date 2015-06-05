@@ -310,4 +310,18 @@ var _ = Describe("Tokenzier", func() {
 			}
 		})
 	})
+
+	Describe("Benchmark", func() {
+		fileContent, err := ioutil.ReadFile("./samples/ABAP/24-game-solve.abap")
+		if err != nil {
+			panic(err)
+		}
+		Measure("it should tokenizer efficiently", func(b Benchmarker) {
+			runtime := b.Time("ExtractTokens runtime", func() {
+				ExtractTokens(string(fileContent))
+			})
+
+			Expect(runtime.Seconds()).To(BeNumerically("<", 0.05))
+		}, 5)
+	})
 })
