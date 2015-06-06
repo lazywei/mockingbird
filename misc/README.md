@@ -21,5 +21,5 @@ Preparing Code Samples
 ## Build Bag-of-Words and Convert Samples to Libsvm
 
 ```
-./misc convertLibsvm ../samples
+./misc convertLibsvm ../samples ../samples.libsvm
 ```
