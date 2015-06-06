@@ -18,6 +18,9 @@ var (
 	libsvmSamplePath = convertLibsvm.
 				Arg("samplePath", "Path to collected samples").
 				Required().String()
+	libsvmOutputFilePath = convertLibsvm.
+				Arg("outputFilePath", "Path for converted output samples").
+				Required().String()
 )
 
 func main() {
@@ -28,6 +31,6 @@ func main() {
 
 	// Post message
 	case "convertLibsvm":
-		ConvertLibsvm(*libsvmSamplePath)
+		ConvertLibsvm(*libsvmSamplePath, *libsvmOutputFilePath)
 	}
 }
