@@ -34,6 +34,9 @@ func ConvertLibsvm(samplePath string, outputFilePath string) {
 			langsIdx[langName] = len(langsIdx)
 		}
 
+		// early stop, remove this when ExtractTokens is efficient enough
+		earlyStopCnt := 0
+
 		for _, codeFile := range codeFiles {
 			sparseFeatures := SparseFeatures{}
 
@@ -43,6 +46,11 @@ func ConvertLibsvm(samplePath string, outputFilePath string) {
 			}
 
 			tokens := mockingbird.ExtractTokens(string(fileContent))
+
+			if len(tokens) == 0 {
+				fmt.Println("Tokens are empty:", codeFile)
+				break
+			}
 
 			for _, token := range tokens {
 
@@ -57,7 +65,10 @@ func ConvertLibsvm(samplePath string, outputFilePath string) {
 			labels = append(labels, langsIdx[langName])
 
 			// early stop, remove this when ExtractTokens is efficient enough
-			break
+			earlyStopCnt += 1
+			if earlyStopCnt >= 10 {
+				break
+			}
 		}
 	}
 
