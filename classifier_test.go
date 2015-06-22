@@ -1,6 +1,7 @@
 package mockingbird_test
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	. "github.com/lazywei/mockingbird"
 
 	. "github.com/onsi/ginkgo"
@@ -78,6 +79,16 @@ var _ = Describe("Naive Bayes", func() {
 				Expect(tokenCountPerLang[3][i]).To(Equal(expectedVal))
 			}
 
+		})
+
+	})
+
+	Describe("Prediction", func() {
+
+		nb.Fit(X, y)
+
+		It("should predict", func() {
+			spew.Dump(nb.Predict(X))
 		})
 
 	})

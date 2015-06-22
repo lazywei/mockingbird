@@ -1,6 +1,11 @@
 package mockingbird
 
-import "github.com/gonum/matrix/mat64"
+import (
+	"fmt"
+	"math"
+
+	"github.com/gonum/matrix/mat64"
+)
 
 type Classifier interface {
 	Fit()
@@ -42,15 +47,6 @@ func (nb *NaiveBayes) Fit(X, y *mat64.Dense) {
 			}
 			tokenCountPerLang[langIdx][j] += int(X.At(i, j))
 		}
-
-		// if _, ok := tokenCountPerLang[langIdx]; !ok {
-		// 	tokenCountPerLang[langIdx] = mat64.NewVector(nFeatures, nil)
-		// }
-
-		// tokenCountPerLang[langIdx].AddVec(
-		// 	tokenCountPerLang[langIdx],
-		// 	X.RowView(0),
-		// )
 	}
 
 	nb.tokensTotal = tokensTotal
@@ -61,16 +57,76 @@ func (nb *NaiveBayes) Fit(X, y *mat64.Dense) {
 }
 
 func (nb *NaiveBayes) GetParams() (
-	int, int, map[int]int, map[int]int, map[int](map[int]int)) {
+	tokensTotal int,
+	langsTotal int,
+	langsCount map[int]int,
+	tokensTotalPerLang map[int]int,
+	tokenCountPerLang map[int](map[int]int)) {
 
-	return nb.tokensTotal, nb.langsTotal,
-		nb.langsCount, nb.tokensTotalPerLang, nb.tokenCountPerLang
+	tokensTotal = nb.tokensTotal
+	langsTotal = nb.langsTotal
+	langsCount = nb.langsCount
+	tokensTotalPerLang = nb.tokensTotalPerLang
+	tokenCountPerLang = nb.tokenCountPerLang
+
+	return
 }
 
-func histogram(data_arr []float64) map[int]int {
+func (nb *NaiveBayes) Predict(X *mat64.Dense) []int {
+	nSamples, _ := X.Dims()
+
+	prediction := []int{}
+
+	for i := 0; i < nSamples; i++ {
+		scores := map[int]float64{}
+		for langIdx, _ := range nb.langsCount {
+			scores[langIdx] = nb.tokensProba(X.Row(nil, i), langIdx) + nb.langProba(langIdx)
+		}
+
+		bestScore := -1.0
+		bestLangIdx := -1
+
+		for langIdx, score := range scores {
+			if score > bestScore {
+				bestScore = score
+				bestLangIdx = langIdx
+			}
+		}
+
+		prediction = append(prediction, bestLangIdx)
+	}
+
+	return prediction
+}
+
+func (nb *NaiveBayes) tokensProba(dataArr []float64, langIdx int) float64 {
+	result := 0.0
+
+	for tokenIdx, _ := range dataArr {
+		result = result + math.Log(nb.tokenProba(tokenIdx, langIdx))
+		fmt.Println(result)
+	}
+
+	return result
+}
+
+func (nb *NaiveBayes) tokenProba(tokenIdx int, langIdx int) float64 {
+	tokenCount, ok := nb.tokenCountPerLang[langIdx][tokenIdx]
+	if tokenCount > 0 && ok {
+		return float64(tokenCount) / float64(nb.tokensTotalPerLang[langIdx])
+	} else {
+		return 1.0 / float64(nb.tokensTotal)
+	}
+}
+
+func (nb *NaiveBayes) langProba(langIdx int) float64 {
+	return math.Log(float64(nb.langsCount[langIdx]) / float64(nb.langsTotal))
+}
+
+func histogram(dataArr []float64) map[int]int {
 	results := map[int]int{}
 
-	for _, val := range data_arr {
+	for _, val := range dataArr {
 		results[int(val)] += 1
 	}
 
@@ -93,12 +149,4 @@ func uniqVals(data_arr []float64) []float64 {
 	}
 
 	return uniqResults
-}
-
-func tokenProba() float64 {
-	return 0
-}
-
-func langProba() float64 {
-	return 0
 }
