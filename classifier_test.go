@@ -12,7 +12,6 @@ var _ = Describe("Naive Bayes", func() {
 	X, y := ReadLibsvm("test_fixture/samples.libsvm")
 
 	/* _, nFeatures := X.Dims() */
-
 	/* X, _ = X.View(0, 0, 3, nFeatures).(*mat64.Dense) */
 	/* y, _ = y.View(0, 0, 3, 1).(*mat64.Dense) */
 
@@ -84,7 +83,6 @@ var _ = Describe("Naive Bayes", func() {
 	})
 
 	Describe("Prediction", func() {
-
 		nb.Fit(X, y)
 
 		It("should predict", func() {

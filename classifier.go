@@ -1,7 +1,6 @@
 package mockingbird
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/gonum/matrix/mat64"
@@ -102,21 +101,24 @@ func (nb *NaiveBayes) Predict(X *mat64.Dense) []int {
 func (nb *NaiveBayes) tokensProba(dataArr []float64, langIdx int) float64 {
 	result := 0.0
 
-	for tokenIdx, _ := range dataArr {
-		result = result + math.Log(nb.tokenProba(tokenIdx, langIdx))
-		fmt.Println(result)
+	for tokenIdx, nTokens := range dataArr {
+		if nTokens > 0 {
+			result = result + math.Log(nb.tokenProba(tokenIdx, langIdx)*nTokens)
+		}
 	}
 
-	return result
+	return -result
 }
 
 func (nb *NaiveBayes) tokenProba(tokenIdx int, langIdx int) float64 {
 	tokenCount, ok := nb.tokenCountPerLang[langIdx][tokenIdx]
+	proba := 0.0
 	if tokenCount > 0 && ok {
-		return float64(tokenCount) / float64(nb.tokensTotalPerLang[langIdx])
+		proba = float64(tokenCount) / float64(nb.tokensTotalPerLang[langIdx])
 	} else {
-		return 1.0 / float64(nb.tokensTotal)
+		proba = 1.0 / float64(nb.tokensTotal)
 	}
+	return proba
 }
 
 func (nb *NaiveBayes) langProba(langIdx int) float64 {
