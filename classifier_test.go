@@ -9,7 +9,7 @@ import (
 )
 
 var _ = Describe("Naive Bayes", func() {
-	X, y := ReadLibsvm("test_fixture/samples.libsvm")
+	X, y := ReadLibsvm("test_fixture/test_samples.libsvm")
 
 	/* _, nFeatures := X.Dims() */
 	/* X, _ = X.View(0, 0, 3, nFeatures).(*mat64.Dense) */

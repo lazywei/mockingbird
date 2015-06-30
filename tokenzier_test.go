@@ -104,12 +104,12 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/C/hello.h", []string{
+				{"test_fixture/test_samples/C/hello.h", []string{
 					`#ifndef`, `HELLO_H`, `#define`,
 					`HELLO_H`, `void`, `hello`,
 					`(`, `)`, `;`, `#endif`}},
 
-				{"test_fixture/samples/C/hello.c", []string{
+				{"test_fixture/test_samples/C/hello.c", []string{
 					`#include`, `<stdio.h>`, `int`,
 					`main`, `(`, `)`,
 					`{`, `printf`, `(`,
@@ -131,13 +131,13 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/C++/bar.h", []string{
+				{"test_fixture/test_samples/C++/bar.h", []string{
 					`class`, `Bar`, `{`,
 					`protected`, `char`,
 					`*name`, `;`, `public`,
 					`void`, `hello`, `(`, `)`, `;`, `}`}},
 
-				{"test_fixture/samples/C++/hello.cpp", []string{
+				{"test_fixture/test_samples/C++/hello.cpp", []string{
 					`#include`, `<iostream>`, `using`,
 					`namespace`, `std`, `;`,
 					`int`, `main`, `(`, `)`, `{`,
@@ -159,14 +159,14 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/Objective-C/Foo.h", []string{
+				{"test_fixture/test_samples/Objective-C/Foo.h", []string{
 					`#import`, `<Foundation/Foundation.h>`, `@interface`, `Foo`,
 					`NSObject`, `{`, `}`, `@end`}},
 
-				{"test_fixture/samples/Objective-C/Foo.m", []string{
+				{"test_fixture/test_samples/Objective-C/Foo.m", []string{
 					`#import`, `@implementation`, `Foo`, `@end`}},
 
-				{"test_fixture/samples/Objective-C/hello.m", []string{
+				{"test_fixture/test_samples/Objective-C/hello.m", []string{
 					`#import`, `<Cocoa/Cocoa.h>`, `int`, `main`, `(`, `int`, `argc`,
 					`char`, `*argv`, `[`, `]`, `)`, `{`, `NSLog`, `(`, `@`, `)`, `;`,
 					`return`, `;`, `}`}},
@@ -187,14 +187,14 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/Objective-C/Foo.h", []string{
+				{"test_fixture/test_samples/Objective-C/Foo.h", []string{
 					`#import`, `<Foundation/Foundation.h>`, `@interface`, `Foo`,
 					`NSObject`, `{`, `}`, `@end`}},
 
-				{"test_fixture/samples/Objective-C/Foo.m", []string{
+				{"test_fixture/test_samples/Objective-C/Foo.m", []string{
 					`#import`, `@implementation`, `Foo`, `@end`}},
 
-				{"test_fixture/samples/Objective-C/hello.m", []string{
+				{"test_fixture/test_samples/Objective-C/hello.m", []string{
 					`#import`, `<Cocoa/Cocoa.h>`, `int`, `main`, `(`, `int`, `argc`,
 					`char`, `*argv`, `[`, `]`, `)`, `{`, `NSLog`, `(`, `@`, `)`, `;`,
 					`return`, `;`, `}`}},
@@ -215,7 +215,7 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/JavaScript/hello.js", []string{
+				{"test_fixture/test_samples/JavaScript/hello.js", []string{
 					`(`, `function`, `(`, `)`, `{`, `console.log`, `(`, `)`, `;`, `}`,
 					`)`, `.call`, `(`, `this`, `)`, `;`}},
 			}
@@ -235,7 +235,7 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/JSON/product.json", []string{
+				{"test_fixture/test_samples/JSON/product.json", []string{
 					`{`, `[`, `]`, `{`, `}`, `}`}},
 			}
 
@@ -253,10 +253,10 @@ var _ = Describe("Tokenzier", func() {
 				file   string
 				tokens []string
 			}{
-				{"test_fixture/samples/Ruby/foo.rb", []string{
+				{"test_fixture/test_samples/Ruby/foo.rb", []string{
 					`module`, `Foo`, `end`}},
 
-				{"test_fixture/samples/Ruby/Rakefile", []string{
+				{"test_fixture/test_samples/Ruby/Rakefile", []string{
 					`task`, `default`, `do`, `puts`, `end`}},
 			}
 
@@ -278,27 +278,27 @@ var _ = Describe("Tokenzier", func() {
 				file    string
 				shebang string
 			}{
-				{"test_fixture/samples/Shell/sh", "SHEBANG#!sh"},
+				{"test_fixture/test_samples/Shell/sh", "SHEBANG#!sh"},
 
-				{"test_fixture/samples/Shell/bash", "SHEBANG#!bash"},
+				{"test_fixture/test_samples/Shell/bash", "SHEBANG#!bash"},
 
-				{"test_fixture/samples/Shell/zsh", "SHEBANG#!zsh"},
+				{"test_fixture/test_samples/Shell/zsh", "SHEBANG#!zsh"},
 
-				{"test_fixture/samples/Shell/invalid-shebang.sh", "echo"},
+				{"test_fixture/test_samples/Shell/invalid-shebang.sh", "echo"},
 
-				{"test_fixture/samples/Perl/perl", "SHEBANG#!perl"},
+				{"test_fixture/test_samples/Perl/perl", "SHEBANG#!perl"},
 
-				{"test_fixture/samples/Python/python", "SHEBANG#!python"},
+				{"test_fixture/test_samples/Python/python", "SHEBANG#!python"},
 
-				{"test_fixture/samples/Ruby/ruby", "SHEBANG#!ruby"},
+				{"test_fixture/test_samples/Ruby/ruby", "SHEBANG#!ruby"},
 
-				{"test_fixture/samples/Ruby/ruby2", "SHEBANG#!ruby"},
+				{"test_fixture/test_samples/Ruby/ruby2", "SHEBANG#!ruby"},
 
-				{"test_fixture/samples/JavaScript/js", "SHEBANG#!node"},
+				{"test_fixture/test_samples/JavaScript/js", "SHEBANG#!node"},
 
-				{"test_fixture/samples/PHP/php", "SHEBANG#!php"},
+				{"test_fixture/test_samples/PHP/php", "SHEBANG#!php"},
 
-				{"test_fixture/samples/Erlang/factorial", "SHEBANG#!escript"},
+				{"test_fixture/test_samples/Erlang/factorial", "SHEBANG#!escript"},
 			}
 
 			for _, tokenTest := range tokenTests {
