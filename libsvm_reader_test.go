@@ -11,7 +11,7 @@ var _ = Describe("LibsvmReader", func() {
 	Describe("ReadLibsvm", func() {
 
 		It("should read libsvm format file", func() {
-			X, y := ReadLibsvm("test_fixture/samples.libsvm")
+			X, y := ReadLibsvm("test_fixture/test_samples.libsvm")
 
 			nSamples, nFeatures := X.Dims()
 			Expect(nSamples).To(Equal(30))
