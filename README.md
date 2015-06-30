@@ -1,4 +1,4 @@
-Mockingbird
+Mockingbird [![Build Status](https://travis-ci.org/lazywei/mockingbird.svg?branch=master)](https://travis-ci.org/lazywei/mockingbird)
 ===========
 
 ## Introduction

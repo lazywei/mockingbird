@@ -1,0 +1,9 @@
+language: go
+go:
+  - 1.4
+  - tip
+before_install:
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/onsi/gomega
+script:
+  - ginkgo
