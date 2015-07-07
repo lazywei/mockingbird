@@ -6,6 +6,12 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
+type Prediction struct {
+	Label    int
+	Language string
+	Score    float64
+}
+
 type Classifier interface {
 	Fit()
 	Predict()
@@ -27,7 +33,7 @@ func (nb *NaiveBayes) Fit(X, y *mat64.Dense) {
 	nSamples, nFeatures := X.Dims()
 
 	tokensTotal := 0
-	langsTotal := len(uniqVals(y.Col(nil, 0)))
+	langsTotal, _ := y.Dims()
 
 	langsCount := histogram(y.Col(nil, 0))
 
@@ -71,10 +77,10 @@ func (nb *NaiveBayes) GetParams() (
 	return
 }
 
-func (nb *NaiveBayes) Predict(X *mat64.Dense) []int {
+func (nb *NaiveBayes) Predict(X *mat64.Dense) []Prediction {
 	nSamples, _ := X.Dims()
 
-	prediction := []int{}
+	prediction := []Prediction{}
 
 	for i := 0; i < nSamples; i++ {
 		scores := map[int]float64{}
@@ -82,8 +88,8 @@ func (nb *NaiveBayes) Predict(X *mat64.Dense) []int {
 			scores[langIdx] = nb.tokensProba(X.Row(nil, i), langIdx) + nb.langProba(langIdx)
 		}
 
-		bestScore := -1.0
-		bestLangIdx := -1
+		bestScore := scores[0]
+		bestLangIdx := 0
 
 		for langIdx, score := range scores {
 			if score > bestScore {
@@ -92,7 +98,11 @@ func (nb *NaiveBayes) Predict(X *mat64.Dense) []int {
 			}
 		}
 
-		prediction = append(prediction, bestLangIdx)
+		prediction = append(prediction, Prediction{
+			Label:    bestLangIdx,
+			Language: "TODO: PENDING",
+			Score:    bestScore,
+		})
 	}
 
 	return prediction
@@ -102,12 +112,14 @@ func (nb *NaiveBayes) tokensProba(dataArr []float64, langIdx int) float64 {
 	result := 0.0
 
 	for tokenIdx, nTokens := range dataArr {
-		if nTokens > 0 {
-			result = result + math.Log(nb.tokenProba(tokenIdx, langIdx)*nTokens)
-		}
+		// Equivalent to:
+		// for i = 0 to nTokens
+		//     result += log(tokenProba(tokenIdx, langIdx))
+		result = result + math.Log(
+			math.Pow(nb.tokenProba(tokenIdx, langIdx), nTokens))
 	}
 
-	return -result
+	return result
 }
 
 func (nb *NaiveBayes) tokenProba(tokenIdx int, langIdx int) float64 {

@@ -14,8 +14,8 @@ var _ = Describe("LibsvmReader", func() {
 			X, y := ReadLibsvm("test_fixture/test_samples.libsvm")
 
 			nSamples, nFeatures := X.Dims()
-			Expect(nSamples).To(Equal(30))
-			Expect(nFeatures).To(Equal(622))
+			Expect(nSamples).To(Equal(22))
+			Expect(nFeatures).To(Equal(91))
 
 			nSamplesY, nColsY := y.Dims()
 			Expect(nSamplesY).To(Equal(nSamples))
