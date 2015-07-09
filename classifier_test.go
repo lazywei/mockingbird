@@ -110,4 +110,13 @@ var _ = Describe("Naive Bayes", func() {
 		})
 
 	})
+
+	Describe("ToYaml", func() {
+		nb.Fit(X, y)
+
+		It("should return yaml string", func() {
+			/* bs := nb.ToYaml() */
+			/* nnb := FromYaml(bs) */
+		})
+	})
 })
