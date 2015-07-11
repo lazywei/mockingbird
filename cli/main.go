@@ -1,6 +1,11 @@
 package main
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+
 	mb "github.com/lazywei/mockingbird"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -42,6 +47,17 @@ func main() {
 		X, y := mb.ReadLibsvm(*trainSample)
 		nb := mb.NewNaiveBayes()
 		nb.Fit(X, y)
+
+		os.MkdirAll(*trainOutput, 0755)
+		err := ioutil.WriteFile(
+			filepath.Join(*trainOutput, "naive_bayes.yaml"),
+			[]byte(nb.ToYaml()),
+			0644,
+		)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 
 	case "predict":
 
