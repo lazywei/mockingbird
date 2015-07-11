@@ -96,7 +96,7 @@ func (nb *NaiveBayes) ToYaml() string {
 	return string(d)
 }
 
-func FromYaml(yamlStr string) *NaiveBayes {
+func NewNaiveBayesFromYaml(yamlStr string) *NaiveBayes {
 	params := nbParams{}
 	err := yaml.Unmarshal([]byte(yamlStr), &params)
 	if err != nil {
