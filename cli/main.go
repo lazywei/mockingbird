@@ -24,7 +24,7 @@ var (
 	predict      = kingpin.Command("predict", "Predict via trained Classifier")
 	predictModel = predict.
 			Flag("model", "Path for loading saved model").
-			Default("./model/naive_bayes.yaml").String()
+			Default("./model/naive_bayes.gob").String()
 	predictTestData = predict.
 			Flag("data", "Path for testing data (in libsvm format)").
 			Required().String()
@@ -39,17 +39,12 @@ var (
 
 	convertLibsvm    = kingpin.Command("convertLibsvm", "Convert collected Rosetta data to BoW in libsvm format")
 	libsvmSamplePath = convertLibsvm.
-				Arg("samplePath", "Path to collected samples").
+				Arg("samplePath", "Path for collected samples").
 				Required().String()
-	libsvmOutputFilePath = convertLibsvm.
-				Arg("outputFilePath", "Path for converted output samples").
+	libsvmOutputDirPath = convertLibsvm.
+				Arg("outputDirPath", "Path for saving converted output samples and BOW params").
 				Required().String()
 )
-
-type P struct {
-	X    int
-	Name map[int]int
-}
 
 func main() {
 	switch kingpin.Parse() {
@@ -96,6 +91,6 @@ func main() {
 		CollectRosetta(*rosettaRootPath, *rosettaDestPath)
 
 	case "convertLibsvm":
-		ConvertLibsvm(*libsvmSamplePath, *libsvmOutputFilePath)
+		ConvertLibsvm(*libsvmSamplePath, *libsvmOutputDirPath)
 	}
 }

@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 
@@ -12,7 +16,12 @@ import (
 
 type SparseFeatures map[int]int
 
-func ConvertLibsvm(samplePath string, outputFilePath string) {
+type BowParams struct {
+	LangsMapping  map[string]int
+	TokensMapping map[string]int
+}
+
+func ConvertLibsvm(samplePath string, outputDirPath string) {
 
 	// var start time.Time
 	// var elapsed time.Duration
@@ -72,16 +81,28 @@ func ConvertLibsvm(samplePath string, outputFilePath string) {
 		}
 	}
 
-	outputFile, err := os.Create(outputFilePath)
+	outputFile, err := os.Create(filepath.Join(outputDirPath, "samples.libsvm"))
+	bowParamsFile, err := os.Create(filepath.Join(outputDirPath, "bow.gob"))
 	if err != nil {
 		fmt.Println("Got error when trying to create libsvm format output file")
 		panic(err)
 	}
 	defer outputFile.Close()
+	defer bowParamsFile.Close()
 
 	for i, label := range labels {
 		outputFile.WriteString(libsvmFmt(label, bagOfWords[i]) + "\n")
 	}
+
+	var output bytes.Buffer
+	enc := gob.NewEncoder(&output)
+
+	err = enc.Encode(BowParams{langsIdx, tokensIdx})
+	if err != nil {
+		log.Fatal("Encode BowParams error:", err)
+	}
+
+	bowParamsFile.WriteString(output.String())
 }
 
 func sortedKeys(sparseFeatures SparseFeatures) []int {
