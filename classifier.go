@@ -1,11 +1,12 @@
 package mockingbird
 
 import (
+	"bytes"
+	"encoding/gob"
 	"log"
 	"math"
 
 	"github.com/gonum/matrix/mat64"
-	"gopkg.in/yaml.v2"
 )
 
 type Prediction struct {
@@ -87,21 +88,33 @@ func (nb *NaiveBayes) GetParams() (
 	return
 }
 
-func (nb *NaiveBayes) ToYaml() string {
+func (nb *NaiveBayes) ToGob() string {
+	var output bytes.Buffer
+
 	params := nb.params
-	d, err := yaml.Marshal(&params)
+
+	enc := gob.NewEncoder(&output)
+
+	err := enc.Encode(params)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("encode error:", err)
 	}
-	return string(d)
+
+	return output.String()
 }
 
-func NewNaiveBayesFromYaml(yamlStr string) *NaiveBayes {
-	params := nbParams{}
-	err := yaml.Unmarshal([]byte(yamlStr), &params)
+func NewNaiveBayesFromGob(gobStr string) *NaiveBayes {
+	var params nbParams
+
+	input := bytes.NewBufferString(gobStr)
+
+	dec := gob.NewDecoder(input)
+
+	err := dec.Decode(&params)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	nb := NewNaiveBayes()
 	nb.params = params
 	return nb

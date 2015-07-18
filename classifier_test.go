@@ -111,12 +111,12 @@ var _ = Describe("Naive Bayes", func() {
 
 	})
 
-	Describe("ToYaml and NewNaiveBayesFromYaml", func() {
+	Describe("ToGob and NewNaiveBayesFromGob", func() {
 		nb.Fit(X, y)
 
-		It("should be the same after load from dumped yaml", func() {
-			yamlStr := nb.ToYaml()
-			nnb := NewNaiveBayesFromYaml(yamlStr)
+		It("should be the same after load from encoded gob", func() {
+			gobStr := nb.ToGob()
+			nnb := NewNaiveBayesFromGob(gobStr)
 
 			a1, b1, c1, d1, e1 := nb.GetParams()
 			a2, b2, c2, d2, e2 := nnb.GetParams()
