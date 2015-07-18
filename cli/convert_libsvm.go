@@ -22,14 +22,84 @@ type BowParams struct {
 }
 
 func ConvertLibsvm(samplePath string, outputDirPath string) {
+	totalTokens, totalLangs := getTotalTokensAndLangs(samplePath)
 
-	// var start time.Time
-	// var elapsed time.Duration
-	langsIdx := map[string]int{}
-	tokensIdx := map[string]int{}
+	// Construct BowParams
+	langsMapping := map[string]int{}
+	tokensMapping := map[string]int{}
 
-	bagOfWords := []SparseFeatures{}
-	labels := []int{}
+	for i, tokens := range totalTokens {
+		for _, token := range tokens {
+			if _, ok := tokensMapping[token]; !ok {
+				tokensMapping[token] = len(tokensMapping)
+			}
+		}
+
+		langName := totalLangs[i]
+		if _, ok := langsMapping[langName]; !ok {
+			langsMapping[langName] = len(langsMapping)
+		}
+	}
+	// ----
+
+	bowParams := BowParams{langsMapping, tokensMapping}
+	bagOfWords, labels := getSparseFeatures(totalTokens, totalLangs, bowParams)
+
+	saveLibsvm(bagOfWords, labels, filepath.Join(outputDirPath, "samples.libsvm"))
+	saveBowParams(bowParams, filepath.Join(outputDirPath, "bow.gob"))
+}
+
+func ConvertLibsvmWithBow(samplePath string, outputDirPath string, bowParamsPath string) {
+	var bowParams BowParams
+	totalTokens, totalLangs := getTotalTokensAndLangs(samplePath)
+
+	input, err := os.Open(bowParamsPath)
+	dec := gob.NewDecoder(input)
+
+	err = dec.Decode(&bowParams)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bagOfWords, labels := getSparseFeatures(totalTokens, totalLangs, bowParams)
+
+	saveLibsvm(bagOfWords, labels, filepath.Join(outputDirPath, "samples.libsvm"))
+}
+
+func saveLibsvm(bagOfWords []SparseFeatures, labels []int, filepath string) {
+	outputFile, err := os.Create(filepath)
+	if err != nil {
+		fmt.Println("Got error when trying to create libsvm format output file")
+		panic(err)
+	}
+	defer outputFile.Close()
+
+	for i, label := range labels {
+		outputFile.WriteString(libsvmFmt(label, bagOfWords[i]) + "\n")
+	}
+}
+
+func saveBowParams(bowParams BowParams, filepath string) {
+	var output bytes.Buffer
+	enc := gob.NewEncoder(&output)
+	err := enc.Encode(bowParams)
+	if err != nil {
+		log.Fatal("Encode BowParams error:", err)
+	}
+
+	bowParamsFile, err := os.Create(filepath)
+	if err != nil {
+		fmt.Println("Got error when trying to create libsvm format output file")
+		panic(err)
+	}
+	defer bowParamsFile.Close()
+
+	bowParamsFile.WriteString(output.String())
+}
+
+func getTotalTokensAndLangs(samplePath string) (totalTokens [][]string, totalLangs []string) {
+	totalTokens = [][]string{}
+	totalLangs = []string{}
 
 	langDirs := getSubEntries(samplePath, true, nil)
 
@@ -39,16 +109,10 @@ func ConvertLibsvm(samplePath string, outputDirPath string) {
 		codeFiles := getSubEntries(langDir, false, nil)
 		langName := getLastSegInPath(langDir)
 
-		if _, ok := langsIdx[langName]; !ok {
-			langsIdx[langName] = len(langsIdx)
-		}
-
 		// early stop, remove this when ExtractTokens is efficient enough
 		earlyStopCnt := 0
 
 		for _, codeFile := range codeFiles {
-			sparseFeatures := SparseFeatures{}
-
 			fileContent, err := ioutil.ReadFile(codeFile)
 			if err != nil {
 				panic(err)
@@ -61,17 +125,8 @@ func ConvertLibsvm(samplePath string, outputDirPath string) {
 				break
 			}
 
-			for _, token := range tokens {
-
-				if _, ok := tokensIdx[token]; !ok {
-					tokensIdx[token] = len(tokensIdx)
-				}
-
-				sparseFeatures[tokensIdx[token]] += 1
-			}
-
-			bagOfWords = append(bagOfWords, sparseFeatures)
-			labels = append(labels, langsIdx[langName])
+			totalTokens = append(totalTokens, tokens)
+			totalLangs = append(totalLangs, langName)
 
 			// early stop, remove this when ExtractTokens is efficient enough
 			earlyStopCnt += 1
@@ -81,28 +136,25 @@ func ConvertLibsvm(samplePath string, outputDirPath string) {
 		}
 	}
 
-	outputFile, err := os.Create(filepath.Join(outputDirPath, "samples.libsvm"))
-	bowParamsFile, err := os.Create(filepath.Join(outputDirPath, "bow.gob"))
-	if err != nil {
-		fmt.Println("Got error when trying to create libsvm format output file")
-		panic(err)
-	}
-	defer outputFile.Close()
-	defer bowParamsFile.Close()
+	return totalTokens, totalLangs
+}
 
-	for i, label := range labels {
-		outputFile.WriteString(libsvmFmt(label, bagOfWords[i]) + "\n")
-	}
+func getSparseFeatures(totalTokens [][]string, totalLangs []string, bowParams BowParams) (bagOfWords []SparseFeatures, labels []int) {
+	bagOfWords = []SparseFeatures{}
+	labels = []int{}
 
-	var output bytes.Buffer
-	enc := gob.NewEncoder(&output)
+	for i, tokens := range totalTokens {
+		sparseFeatures := SparseFeatures{}
+		for _, token := range tokens {
+			sparseFeatures[bowParams.TokensMapping[token]] += 1
+		}
 
-	err = enc.Encode(BowParams{langsIdx, tokensIdx})
-	if err != nil {
-		log.Fatal("Encode BowParams error:", err)
+		labels = append(labels, bowParams.LangsMapping[totalLangs[i]])
+
+		bagOfWords = append(bagOfWords, sparseFeatures)
 	}
 
-	bowParamsFile.WriteString(output.String())
+	return bagOfWords, labels
 }
 
 func sortedKeys(sparseFeatures SparseFeatures) []int {

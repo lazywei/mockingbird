@@ -44,6 +44,9 @@ var (
 	libsvmOutputDirPath = convertLibsvm.
 				Arg("outputDirPath", "Path for saving converted output samples and BOW params").
 				Required().String()
+	libsvmBowPath = convertLibsvm.
+			Flag("bowPath", "Path for predefined bag-of-words params for constructing libsvm format").
+			Default("").String()
 )
 
 func main() {
@@ -91,6 +94,10 @@ func main() {
 		CollectRosetta(*rosettaRootPath, *rosettaDestPath)
 
 	case "convertLibsvm":
-		ConvertLibsvm(*libsvmSamplePath, *libsvmOutputDirPath)
+		if *libsvmBowPath != "" {
+			ConvertLibsvmWithBow(*libsvmSamplePath, *libsvmOutputDirPath, *libsvmBowPath)
+		} else {
+			ConvertLibsvm(*libsvmSamplePath, *libsvmOutputDirPath)
+		}
 	}
 }
