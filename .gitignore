@@ -1,3 +1,7 @@
 samples
-misc/misc
 samples.libsvm
+
+.ropeproject
+
+cli/mockingbird
+cli/model
