@@ -1,7 +1,7 @@
 Mockingbird [![Build Status](https://travis-ci.org/lazywei/mockingbird.svg?branch=master)](https://travis-ci.org/lazywei/mockingbird)
 ===========
 
-## Introduction
+# Introduction
 
 [Linguist](https://github.com/github/linguist)'s Classifier in Go.
 
@@ -19,7 +19,46 @@ $ ./build.sh
 $ ./mockingbird --help
 ```
 
-## Command Line Interface Usage
+# Command Line Interface Usage
+
+## Preparing LIBSVM format dataset
+
+### Collect Rosetta Code
+
+1. Clone the [RosettaCodeData](https://github.com/acmeism/RosettaCodeData)
+
+  ```
+  git clone git@github.com:acmeism/RosettaCodeData.git
+  ```
+
+2. Build this `cli` executable
+
+  ```
+  cd cli/
+  ./build.sh
+  ```
+
+3. Run the `collectRosetta` according to the cloned RosettaCodeData, and collect
+   files to `../samples`
+
+  ```
+  ./mockingbird collectRosetta path/to/clones/RosettaCodeData ../samples
+  ```
+
+### Build Bag-of-Words and Convert Samples to Libsvm
+
+Build from scratch
+```
+./mockingbird convertLibsvm ../samples ../
+```
+This will save `libsvm.samples` and `bow.gob` to `../`. The `bow.gob` is the
+parameters for constructing bag-of-words. This can be used afterward:
+
+```
+./mockingbird convertLibsvm ../samples ../ --bowPath ../bow.gob
+```
+
+## Train and Predict
 
 ### Train
 
