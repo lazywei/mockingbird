@@ -110,4 +110,22 @@ var _ = Describe("Naive Bayes", func() {
 		})
 
 	})
+
+	Describe("ToGob and NewNaiveBayesFromGob", func() {
+		nb.Fit(X, y)
+
+		It("should be the same after load from encoded gob", func() {
+			gobStr := nb.ToGob()
+			nnb := NewNaiveBayesFromGob(gobStr)
+
+			a1, b1, c1, d1, e1 := nb.GetParams()
+			a2, b2, c2, d2, e2 := nnb.GetParams()
+
+			Expect(a1).To(Equal(a2))
+			Expect(b1).To(Equal(b2))
+			Expect(c1).To(Equal(c2))
+			Expect(d1).To(Equal(d2))
+			Expect(e1).To(Equal(e2))
+		})
+	})
 })

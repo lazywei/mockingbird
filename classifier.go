@@ -1,6 +1,9 @@
 package mockingbird
 
 import (
+	"bytes"
+	"encoding/gob"
+	"log"
 	"math"
 
 	"github.com/gonum/matrix/mat64"
@@ -18,11 +21,15 @@ type Classifier interface {
 }
 
 type NaiveBayes struct {
-	tokensTotal        int
-	langsTotal         int
-	langsCount         map[int]int
-	tokensTotalPerLang map[int]int
-	tokenCountPerLang  map[int](map[int]int)
+	params nbParams
+}
+
+type nbParams struct {
+	TokensTotal        int
+	LangsTotal         int
+	LangsCount         map[int]int
+	TokensTotalPerLang map[int]int
+	TokenCountPerLang  map[int](map[int]int)
 }
 
 func NewNaiveBayes() *NaiveBayes {
@@ -54,11 +61,15 @@ func (nb *NaiveBayes) Fit(X, y *mat64.Dense) {
 		}
 	}
 
-	nb.tokensTotal = tokensTotal
-	nb.langsTotal = langsTotal
-	nb.langsCount = langsCount
-	nb.tokensTotalPerLang = tokensTotalPerLang
-	nb.tokenCountPerLang = tokenCountPerLang
+	params := nbParams{
+		TokensTotal:        tokensTotal,
+		LangsTotal:         langsTotal,
+		LangsCount:         langsCount,
+		TokensTotalPerLang: tokensTotalPerLang,
+		TokenCountPerLang:  tokenCountPerLang,
+	}
+
+	nb.params = params
 }
 
 func (nb *NaiveBayes) GetParams() (
@@ -68,13 +79,45 @@ func (nb *NaiveBayes) GetParams() (
 	tokensTotalPerLang map[int]int,
 	tokenCountPerLang map[int](map[int]int)) {
 
-	tokensTotal = nb.tokensTotal
-	langsTotal = nb.langsTotal
-	langsCount = nb.langsCount
-	tokensTotalPerLang = nb.tokensTotalPerLang
-	tokenCountPerLang = nb.tokenCountPerLang
+	tokensTotal = nb.params.TokensTotal
+	langsTotal = nb.params.LangsTotal
+	langsCount = nb.params.LangsCount
+	tokensTotalPerLang = nb.params.TokensTotalPerLang
+	tokenCountPerLang = nb.params.TokenCountPerLang
 
 	return
+}
+
+func (nb *NaiveBayes) ToGob() string {
+	var output bytes.Buffer
+
+	params := nb.params
+
+	enc := gob.NewEncoder(&output)
+
+	err := enc.Encode(params)
+	if err != nil {
+		log.Fatal("encode error:", err)
+	}
+
+	return output.String()
+}
+
+func NewNaiveBayesFromGob(gobStr string) *NaiveBayes {
+	var params nbParams
+
+	input := bytes.NewBufferString(gobStr)
+
+	dec := gob.NewDecoder(input)
+
+	err := dec.Decode(&params)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	nb := NewNaiveBayes()
+	nb.params = params
+	return nb
 }
 
 func (nb *NaiveBayes) Predict(X *mat64.Dense) []Prediction {
@@ -84,7 +127,7 @@ func (nb *NaiveBayes) Predict(X *mat64.Dense) []Prediction {
 
 	for i := 0; i < nSamples; i++ {
 		scores := map[int]float64{}
-		for langIdx, _ := range nb.langsCount {
+		for langIdx, _ := range nb.params.LangsCount {
 			scores[langIdx] = nb.tokensProba(X.Row(nil, i), langIdx) + nb.langProba(langIdx)
 		}
 
@@ -123,18 +166,18 @@ func (nb *NaiveBayes) tokensProba(dataArr []float64, langIdx int) float64 {
 }
 
 func (nb *NaiveBayes) tokenProba(tokenIdx int, langIdx int) float64 {
-	tokenCount, ok := nb.tokenCountPerLang[langIdx][tokenIdx]
+	tokenCount, ok := nb.params.TokenCountPerLang[langIdx][tokenIdx]
 	proba := 0.0
 	if tokenCount > 0 && ok {
-		proba = float64(tokenCount) / float64(nb.tokensTotalPerLang[langIdx])
+		proba = float64(tokenCount) / float64(nb.params.TokensTotalPerLang[langIdx])
 	} else {
-		proba = 1.0 / float64(nb.tokensTotal)
+		proba = 1.0 / float64(nb.params.TokensTotal)
 	}
 	return proba
 }
 
 func (nb *NaiveBayes) langProba(langIdx int) float64 {
-	return math.Log(float64(nb.langsCount[langIdx]) / float64(nb.langsTotal))
+	return math.Log(float64(nb.params.LangsCount[langIdx]) / float64(nb.params.LangsTotal))
 }
 
 func histogram(dataArr []float64) map[int]int {
