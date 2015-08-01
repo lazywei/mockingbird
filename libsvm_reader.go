@@ -10,18 +10,18 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-func parseLibsvmElem(elem string) (int, int) {
+func parseLibsvmElem(elem string) (int, float64) {
 	elems := strings.Split(elem, ":")
 
 	featureIdx, err := strconv.Atoi(elems[0])
 	if err != nil {
-		fmt.Println("Got error when parsing libsvm element")
+		fmt.Println("Got error when parsing libsvm element index")
 		panic(err)
 	}
 
-	featureVal, err := strconv.Atoi(elems[1])
+	featureVal, err := strconv.ParseFloat(elems[1], 64)
 	if err != nil {
-		fmt.Println("Got error when parsing libsvm element")
+		fmt.Println("Got error when parsing libsvm element value")
 		panic(err)
 	}
 	return featureIdx, featureVal
