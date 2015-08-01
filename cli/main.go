@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/lazywei/liblinear"
 	mb "github.com/lazywei/mockingbird"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -52,7 +53,7 @@ var (
 func main() {
 	switch kingpin.Parse() {
 	case "train":
-		X, y := mb.ReadLibsvm(*trainSample)
+		X, y := liblinear.ReadLibsvm(*trainSample, false)
 		nb := mb.NewNaiveBayes()
 		nb.Fit(X, y)
 
@@ -81,7 +82,7 @@ func main() {
 		fmt.Println("Model Initiated ...")
 
 		fmt.Println("Data Loading ...")
-		X, _ := mb.ReadLibsvm(*predictTestData)
+		X, _ := liblinear.ReadLibsvm(*predictTestData, false)
 		fmt.Println("Data Loaded")
 
 		labels := []int{}

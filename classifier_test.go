@@ -1,6 +1,7 @@
 package mockingbird_test
 
 import (
+	"github.com/lazywei/liblinear"
 	. "github.com/lazywei/mockingbird"
 
 	. "github.com/onsi/ginkgo"
@@ -8,7 +9,7 @@ import (
 )
 
 var _ = Describe("Naive Bayes", func() {
-	X, y := ReadLibsvm("test_fixture/test_samples.libsvm", false)
+	X, y := liblinear.ReadLibsvm("test_fixture/test_samples.libsvm", false)
 
 	/* _, nFeatures := X.Dims() */
 	/* X, _ = X.View(0, 0, 3, nFeatures).(*mat64.Dense) */
