@@ -27,7 +27,7 @@ func parseLibsvmElem(elem string) (int, float64) {
 	return featureIdx, featureVal
 }
 
-func ReadLibsvm(filepath string) (X, y *mat64.Dense) {
+func ReadLibsvm(filepath string, oneBased bool) (X, y *mat64.Dense) {
 	type Data []string
 
 	file, err := os.Open(filepath)
@@ -49,6 +49,11 @@ func ReadLibsvm(filepath string) (X, y *mat64.Dense) {
 		if idx, _ := parseLibsvmElem(row[len(row)-1]); idx+1 > nFeatures {
 			nFeatures = idx + 1
 		}
+
+		if oneBased {
+			nFeatures = nFeatures - 1
+		}
+
 		nSamples += 1
 	}
 
@@ -65,7 +70,13 @@ func ReadLibsvm(filepath string) (X, y *mat64.Dense) {
 
 		for k := 1; k < len(data); k++ {
 			idx, val := parseLibsvmElem(data[k])
-			X.Set(i, idx, float64(val))
+
+			if oneBased {
+				X.Set(i, idx-1, float64(val))
+			} else {
+				X.Set(i, idx, float64(val))
+			}
+
 		}
 	}
 
