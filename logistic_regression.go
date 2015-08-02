@@ -20,7 +20,7 @@ func NewLogisticRegression() *LogisticRegression {
 }
 
 func (lr *LogisticRegression) Fit(X, y *mat64.Dense) {
-	model := liblinear.Train(X, y, 1, 0, 0.01, 1, 0.1, nil)
+	model := liblinear.Train(X, y, 1, liblinear.L2R_LR, 0.01, 1, 0.1, nil)
 	lr.model = model
 }
 
