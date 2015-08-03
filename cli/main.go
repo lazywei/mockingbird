@@ -21,6 +21,9 @@ var (
 	trainOutput = train.
 			Flag("output", "Path for saving trained model").
 			Default("model").String()
+	trainSolver = train.
+			Flag("solver", "0 = NaiveBayes, 1 = LogisticRegression").
+			Default("0").Int()
 
 	predict      = kingpin.Command("predict", "Predict via trained Classifier")
 	predictModel = predict.
@@ -29,6 +32,9 @@ var (
 	predictTestData = predict.
 			Flag("data", "Path for testing data (in libsvm format)").
 			Required().String()
+	predictSolver = predict.
+			Flag("solver", "0 = NaiveBayes, 1 = LogisticRegression").
+			Default("0").Int()
 
 	collectRosetta  = kingpin.Command("collectRosetta", "Collect RosettaCodeData into proper structure.")
 	rosettaRootPath = collectRosetta.
@@ -54,42 +60,67 @@ func main() {
 	switch kingpin.Parse() {
 	case "train":
 		X, y := liblinear.ReadLibsvm(*trainSample, false)
-		nb := mb.NewNaiveBayes()
-		nb.Fit(X, y)
 
-		os.MkdirAll(*trainOutput, 0755)
-		err := ioutil.WriteFile(
-			filepath.Join(*trainOutput, "naive_bayes.gob"),
-			[]byte(nb.ToGob()),
-			0644,
-		)
+		switch *trainSolver {
+		case 0:
+			nb := mb.NewNaiveBayes()
+			nb.Fit(X, y)
 
-		if err != nil {
-			log.Fatal(err)
+			os.MkdirAll(*trainOutput, 0755)
+			err := ioutil.WriteFile(
+				filepath.Join(*trainOutput, "naive_bayes.gob"),
+				[]byte(nb.ToGob()),
+				0644,
+			)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		case 1:
+			lr := mb.NewLogisticRegression()
+			lr.Fit(X, y)
+			lr.SaveModel(filepath.Join(*trainOutput, "lr.model"))
+
+		default:
+			fmt.Println("Unsupported Solver Type: %v", *trainSolver)
 		}
 
 	case "predict":
-		fmt.Println("Model Loading ...")
-		gobStr, err := ioutil.ReadFile(*predictModel)
-		fmt.Println("Model Loaded")
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("Model Initiating ...")
-		nb := mb.NewNaiveBayesFromGob(string(gobStr))
-		fmt.Println("Model Initiated ...")
-
 		fmt.Println("Data Loading ...")
 		X, _ := liblinear.ReadLibsvm(*predictTestData, false)
 		fmt.Println("Data Loaded")
 
-		labels := []int{}
-		for _, y := range nb.Predict(X) {
-			labels = append(labels, y.Label)
+		switch *predictSolver {
+		case 0:
+			fmt.Println("Model Loading ...")
+			gobStr, err := ioutil.ReadFile(*predictModel)
+			fmt.Println("Model Loaded")
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fmt.Println("Model Initiating ...")
+			nb := mb.NewNaiveBayesFromGob(string(gobStr))
+			fmt.Println("Model Initiated ...")
+
+			labels := []int{}
+			for _, y := range nb.Predict(X) {
+				labels = append(labels, y.Label)
+			}
+			spew.Dump(labels)
+		case 1:
+			lr := mb.NewLogisticRegressionFromModel(*predictModel)
+			labels := []int{}
+			for _, y := range lr.Predict(X) {
+				labels = append(labels, y.Label)
+			}
+			spew.Dump(labels)
+
+		default:
+
+			fmt.Println("Unsupported Solver Type: %v", *predictSolver)
 		}
-		spew.Dump(labels)
 
 	case "collectRosetta":
 		CollectRosetta(*rosettaRootPath, *rosettaDestPath)

@@ -62,6 +62,16 @@ parameters for constructing bag-of-words. This can be used afterward:
 
 ### Train
 
+For example, train a logisitic regression classifier:
+
+```
+./mockingbird train --sample=./test_fixture/test_samples.libsvm --solver 1
+```
+
+This will save a model file in `$PWD/model/lr.model`, which can be used in
+later prediction.
+
+Full usage:
 ```
 usage: mockingbird train [<flags>]
 
@@ -72,15 +82,28 @@ Flags:
   --sample="samples.libsvm"
                     Path for samples (in libsvm format)
   --output="model"  Path for saving trained model
+  --solver=0        0 = NaiveBayes, 1 = LogisticRegression
 ```
 
 ### Predict
 
+For example, make prediction via previously trained logisitic regression
+classifier:
+
 ```
-usage: mockingbird predict
+./mockingbird predict --model=./model/lr.model --data=./test_fixture/test_samples.libsvm --solver=1
+```
+
+Full usage:
+```
+usage: mockingbird predict --data=DATA [<flags>]
 
 Predict via trained Classifier
 
 Flags:
-  --help  Show help (also see --help-long and --help-man).
+  --help       Show help (also see --help-long and --help-man).
+  --model="./model/naive_bayes.gob"
+               Path for loading saved model
+  --data=DATA  Path for testing data (in libsvm format)
+  --solver=0   0 = NaiveBayes, 1 = LogisticRegression
 ```

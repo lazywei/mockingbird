@@ -19,6 +19,11 @@ func NewLogisticRegression() *LogisticRegression {
 	return &LogisticRegression{}
 }
 
+func NewLogisticRegressionFromModel(filepath string) *LogisticRegression {
+	model := liblinear.LoadModel(filepath)
+	return &LogisticRegression{model: model}
+}
+
 func (lr *LogisticRegression) Fit(X, y *mat64.Dense) {
 	model := liblinear.Train(X, y, 1, &liblinear.Parameter{
 		Eps: 0.01, C: 1, P: 0.1,
@@ -55,6 +60,10 @@ func (lr *LogisticRegression) Predict(X *mat64.Dense) []Prediction {
 	}
 
 	return prediction
+}
+
+func (lr *LogisticRegression) SaveModel(filepath string) {
+	liblinear.SaveModel(lr.model, filepath)
 }
 
 // func (nb *NaiveBayes) ToGob() string {
